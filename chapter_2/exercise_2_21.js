@@ -39,7 +39,7 @@ function last_pair(list) {
 
 function reverse(list) {
   function iter(items, result) {
-    return is_null(items) ? result : iter(tail(items), pair(head(items), null));
+    return is_null(items) ? result : iter(tail(items), pair(head(items), result));
   }
 
   return iter(list, null);

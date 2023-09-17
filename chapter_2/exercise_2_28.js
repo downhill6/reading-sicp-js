@@ -1,4 +1,4 @@
-// 练习 2.20
+// 练习 2.28
 
 function pair(x, y) {
   return [x, y];
@@ -45,20 +45,26 @@ function reverse(list) {
   return iter(list, null);
 }
 
-// ==========
-
-function plus_curried(x) {
-  return y => x + y;
+function is_pair(x) {
+  return Array.isArray(x) && x.length === 2;
 }
 
-function brooks(f, list) {
-  return is_null(tail(list)) ? f(head(list)) : brooks(f(head(list)), tail(list));
+function is_list(x) {
+  return x !== null && is_pair(x);
 }
 
-function brooks_curried(list) {
-  return is_null(list) ? null : brooks(head(list), tail(list));
+function deep_reverse(list) {
+  return is_null(list)
+    ? null
+    : is_list(list)
+    ? append(deep_reverse(tail(list)), pair(deep_reverse(head(list)), null))
+    : list;
 }
 
-brooks_curried(list(brooks_curried, list(plus_curried, 3, 4))); // 7
-
-brooks_curried(list(brooks_curried, list(brooks_curried, list(plus_curried, 3, 4)))); // 7
+function fringe(tree) {
+  return is_null(tree)
+    ? null
+    : is_list(tree)
+    ? append(fringe(head(tree)), fringe(tail(tree)))
+    : list(tree);
+}

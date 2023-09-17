@@ -39,13 +39,13 @@ function last_pair(list) {
 
 function reverse_rec(list) {
   // 时间复杂度 O(n^2)
-  return is_null(list) ? null : append(reverse(tail(list)), pair(head(list), null));
+  return is_null(list) ? null : append(reverse_rec(tail(list)), pair(head(list), null));
 }
 
 function reverse(list) {
   // 时间复杂度 O(n)
   function iter(items, result) {
-    return is_null(items) ? result : iter(tail(items), pair(head(items), null));
+    return is_null(items) ? result : iter(tail(items), pair(head(items), result));
   }
 
   return iter(list, null);
