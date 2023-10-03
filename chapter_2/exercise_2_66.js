@@ -1,4 +1,4 @@
-// 练习 2.65
+// 练习 2.66
 
 function pair(x, y) {
   return [x, y];
