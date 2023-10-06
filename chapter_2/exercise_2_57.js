@@ -74,10 +74,6 @@ function is_product(x) {
   return is_pair(x) && head(x) === '*';
 }
 
-// function make_sum(a1, a2) {
-//   return list('+', a1, a2);
-// }
-
 function make_sum(a1, a2) {
   return number_equal(a1, 0)
     ? a2
@@ -91,10 +87,6 @@ function make_sum(a1, a2) {
 function number_equal(exp, num) {
   return is_number(exp) && exp === num;
 }
-
-// function make_product(m1, m2) {
-//   return list('*', m1, m2);
-// }
 
 function make_product(m1, m2) {
   return number_equal(m1, 0) || number_equal(m2, 0)
