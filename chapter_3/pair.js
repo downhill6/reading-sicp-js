@@ -39,6 +39,28 @@ function last_pair(list) {
   return tail(list) === null ? list : last_pair(tail(list));
 }
 
+function equal(a, b) {
+  if (is_pair(a) && is_pair(b)) {
+    return equal(head(a), head(b)) && equal(tail(a), tail(b));
+  } else {
+    return a === b;
+  }
+}
+function contains_cycle(x) {
+  function detect_cycle(fast, slow) {
+    return is_null(fast) || is_null(tail(fast))
+      ? false
+      : fast === slow
+      ? true
+      : detect_cycle(tail(tail(fast)), tail(slow));
+  }
+  return detect_cycle(tail(x), x);
+}
+
+function member(item, list) {
+  return is_null(list) ? null : item === head(list) ? item : member(item, tail(list));
+}
+
 module.exports = {
   pair,
   head,
@@ -50,4 +72,7 @@ module.exports = {
   set_head,
   set_tail,
   append,
+  equal,
+  contains_cycle,
+  member,
 };
