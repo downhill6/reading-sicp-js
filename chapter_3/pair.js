@@ -61,6 +61,14 @@ function member(item, list) {
   return is_null(list) ? null : item === head(list) ? item : member(item, tail(list));
 }
 
+function is_undefined(x) {
+  return x === undefined;
+}
+
+function is_number(x) {
+  return typeof x === 'number';
+}
+
 module.exports = {
   pair,
   head,
@@ -75,4 +83,6 @@ module.exports = {
   equal,
   contains_cycle,
   member,
+  is_undefined,
+  is_number,
 };

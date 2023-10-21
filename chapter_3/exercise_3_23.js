@@ -1,4 +1,4 @@
-// 练习 3.22
+// 练习 3.23
 
 const {pair, head, tail, is_null, is_pair, set_head, set_tail} = require('./pair.js');
 
