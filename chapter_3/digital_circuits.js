@@ -197,7 +197,7 @@ function propagate() {
 
 function probe(name, wire) {
   add_action(wire, () =>
-    display(
+    console.log(
       name + ' ' + String(current_time(the_agenda)) + ', new value = ' + String(get_signal(wire)),
     ),
   );
@@ -303,10 +303,14 @@ propagate();
 
 module.exports = {
   make_wire,
+  or_gate,
+  and_gate,
+  inverter,
   full_adder,
   set_signal,
   get_signal,
   propagate,
   current_time,
   the_agenda,
+  probe,
 };
