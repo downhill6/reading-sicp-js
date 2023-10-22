@@ -40,13 +40,33 @@ const A = list(make_wire(), make_wire(), make_wire(), make_wire());
 const B = list(make_wire(), make_wire(), make_wire(), make_wire());
 const S = list(make_wire(), make_wire(), make_wire(), make_wire());
 const c_out = make_wire();
-// set_wire_signals(A, list(1, 1, 1, 1));
-// set_wire_signals(B, list(0, 0, 0, 0));
-// ripple_carry_adder(A, B, S, c_out);
-// propagate();
 set_wire_signals(A, list(1, 1, 1, 1));
-set_wire_signals(B, list(0, 0, 0, 1));
+set_wire_signals(B, list(0, 0, 1, 0));
 ripple_carry_adder(A, B, S, c_out);
 propagate();
 
-console.log(get_signal(c_out), current_time(the_agenda));
+function print_results(S, c_out) {
+  const res = [];
+  function helper(S) {
+    if (is_null(S)) {
+      return 'done';
+    } else {
+      res.push(get_signal(head(S)));
+      return helper(tail(S));
+    }
+  }
+  helper(S);
+  const n = get_signal(c_out) + res.join('');
+  console.log(
+    'S:',
+    res,
+    'c_out:',
+    get_signal(c_out),
+    '十进制:',
+    parseInt(n, 2),
+    'time:',
+    current_time(the_agenda),
+  );
+}
+
+print_results(S, c_out);

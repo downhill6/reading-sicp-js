@@ -71,6 +71,12 @@ function rear_ptr(queue) {
   return tail(queue);
 }
 
+function front_queue(queue) {
+  return is_empty_queue(queue)
+    ? console.error(queue, 'front_queue called with an empty queue')
+    : head(front_ptr(queue));
+}
+
 function delete_queue(queue) {
   if (!is_empty_queue(queue)) {
     set_front_ptr(queue, tail(front_ptr(queue)));
@@ -174,7 +180,7 @@ function first_agenda_item(agenda) {
   } else {
     const first_seg = first_segment(agenda);
     set_current_time(agenda, segment_time(first_seg));
-    return front_ptr(segment_queue(first_seg));
+    return front_queue(segment_queue(first_seg));
   }
 }
 
@@ -182,11 +188,19 @@ function propagate() {
   if (is_empty_agenda(the_agenda)) {
     return 'done';
   } else {
-    const first_item = front_ptr(first_agenda_item(the_agenda));
+    const first_item = first_agenda_item(the_agenda);
     first_item();
     remove_first_agenda_item(the_agenda);
     return propagate();
   }
+}
+
+function probe(name, wire) {
+  add_action(wire, () =>
+    display(
+      name + ' ' + String(current_time(the_agenda)) + ', new value = ' + String(get_signal(wire)),
+    ),
+  );
 }
 
 const the_agenda = make_agenda();
