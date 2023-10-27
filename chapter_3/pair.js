@@ -69,6 +69,8 @@ function is_number(x) {
   return typeof x === 'number';
 }
 
+const error = console.error.bind(console);
+
 module.exports = {
   pair,
   head,
@@ -85,4 +87,5 @@ module.exports = {
   member,
   is_undefined,
   is_number,
+  error,
 };
