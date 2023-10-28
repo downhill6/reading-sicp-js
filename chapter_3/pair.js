@@ -57,8 +57,8 @@ function contains_cycle(x) {
   return detect_cycle(tail(x), x);
 }
 
-function member(item, list) {
-  return is_null(list) ? null : item === head(list) ? item : member(item, tail(list));
+function member(item, x) {
+  return is_null(x) ? null : item === head(x) ? x : member(item, tail(x));
 }
 
 function is_undefined(x) {
@@ -70,6 +70,17 @@ function is_number(x) {
 }
 
 const error = console.error.bind(console);
+
+function display_list(list) {
+  function rec(list) {
+    return is_pair(list)
+      ? '[' + rec(head(list)) + ', ' + rec(tail(list)) + ']'
+      : is_null(list)
+      ? 'null'
+      : `${list}`;
+  }
+  console.log(rec(list));
+}
 
 module.exports = {
   pair,
@@ -88,4 +99,5 @@ module.exports = {
   is_undefined,
   is_number,
   error,
+  display_list,
 };
