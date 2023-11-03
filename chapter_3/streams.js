@@ -111,6 +111,39 @@ const ones = pair(1, () => ones);
 
 const integers = pair(1, () => add_streams(ones, integers));
 
+function integrate_series(s) {
+  function helper(ss, n) {
+    return pair(head(ss) / n, () => helper(stream_tail(ss), n + 1));
+  }
+  return helper(s, 1);
+}
+
+const exp_series = pair(1, () => integrate_series(exp_series));
+
+const cos_series = pair(1, () =>
+  integrate_series(pair(0, () => stream_map(x => -x, integrate_series(cos_series)))),
+);
+
+const sin_series = pair(0, () =>
+  integrate_series(pair(1, () => stream_map(x => -x, integrate_series(sin_series)))),
+);
+
+const tan_series = div_series(sin_series, cos_series);
+
+function mul_series(s1, s2) {
+  return pair(head(s1) * head(s2), () =>
+    add_streams(mul_series(stream_tail(s1), s2), scale_stream(stream_tail(s2), head(s1))),
+  );
+}
+
+function invert_unit_series(s) {
+  return pair(1, () => stream_map(x => -x, mul_series(stream_tail(s), invert_unit_series(s))));
+}
+
+function div_series(s1, s2) {
+  return head(s2) === 0 ? error('head(s2) is zero') : mul_series(s1, invert_unit_series(s2));
+}
+
 module.exports = {
   stream_tail,
   stream_enumerate_interval,
@@ -126,5 +159,10 @@ module.exports = {
   scale_stream,
   display_stream_infinite,
   merge,
+  mul_series,
+  invert_unit_series,
+  div_series,
   integers,
+  cos_series,
+  sin_series,
 };
