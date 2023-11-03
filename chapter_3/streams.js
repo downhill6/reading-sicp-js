@@ -1,4 +1,4 @@
-const {tail, head, is_null, pair, display_list} = require('./pair');
+const {tail, head, is_null, pair, display_list, set_tail, append, list} = require('./pair');
 
 // stream: 第一项是数据，第二项是一个 promise, 当需要时计算它
 // pair(h, () => t)
@@ -36,6 +36,16 @@ function display_stream(s) {
   return stream_for_each(display_list, s);
 }
 
+function display_stream_infinite(s, n) {
+  const res = [];
+  function iter(s, n) {
+    res.push(head(s));
+    return n === 0 ? null : iter(stream_tail(s), n - 1);
+  }
+  iter(s, n);
+  console.log(res);
+}
+
 function stream_enumerate_interval(low, high) {
   return low > high ? null : pair(low, () => stream_enumerate_interval(low + 1, high));
 }
@@ -63,6 +73,44 @@ function stream_map_optimized(f, s) {
       );
 }
 
+function stream_map_2(f, s1, s2) {
+  return is_null(s1) || is_null(s2)
+    ? null
+    : pair(f(head(s1), head(s2)), () => stream_map_2(f, stream_tail(s1), stream_tail(s2)));
+}
+
+function add_streams(s1, s2) {
+  return stream_map_2((x1, x2) => x1 + x2, s1, s2);
+}
+
+function mul_streams(s1, s2) {
+  return stream_map_2((x1, x2) => x1 * x2, s1, s2);
+}
+
+function scale_stream(stream, factor) {
+  return stream_map(x => x * factor, stream);
+}
+
+function merge(s1, s2) {
+  if (is_null(s1)) {
+    return s2;
+  } else if (is_null(s2)) {
+    return s1;
+  } else {
+    const s1head = head(s1);
+    const s2head = head(s2);
+    return s1head < s2head
+      ? pair(s1head, () => merge(stream_tail(s1), s2))
+      : s1head > s2head
+      ? pair(s2head, () => merge(s1, stream_tail(s2)))
+      : pair(s1head, () => merge(stream_tail(s1), stream_tail(s2)));
+  }
+}
+
+const ones = pair(1, () => ones);
+
+const integers = pair(1, () => add_streams(ones, integers));
+
 module.exports = {
   stream_tail,
   stream_enumerate_interval,
@@ -73,4 +121,10 @@ module.exports = {
   stream_ref,
   display_stream,
   memo,
+  stream_map_2,
+  add_streams,
+  scale_stream,
+  display_stream_infinite,
+  merge,
+  integers,
 };
