@@ -144,6 +144,10 @@ function div_series(s1, s2) {
   return head(s2) === 0 ? error('head(s2) is zero') : mul_series(s1, invert_unit_series(s2));
 }
 
+function partial_sums(stream) {
+  return pair(head(stream), () => add_streams(partial_sums(stream), stream_tail(stream)));
+}
+
 module.exports = {
   stream_tail,
   stream_enumerate_interval,
@@ -160,6 +164,7 @@ module.exports = {
   display_stream_infinite,
   merge,
   mul_series,
+  partial_sums,
   invert_unit_series,
   div_series,
   integers,
