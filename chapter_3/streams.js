@@ -172,6 +172,7 @@ module.exports = {
   invert_unit_series,
   div_series,
   interleave,
+  mul_streams,
   integers,
   cos_series,
   sin_series,
