@@ -1,4 +1,4 @@
-const {tail, head, is_null, pair, display_list, set_tail, append, list} = require('./pair');
+const {tail, head, is_null, pair, display_list, list, append} = require('./pair');
 
 // stream: 第一项是数据，第二项是一个 promise, 当需要时计算它
 // pair(h, () => t)
@@ -37,13 +37,13 @@ function display_stream(s) {
 }
 
 function display_stream_infinite(s, n) {
-  const res = [];
+  let res = list();
   function iter(s, n) {
-    res.push(head(s));
+    res = append(res, list(head(s)));
     return n === 0 ? null : iter(stream_tail(s), n - 1);
   }
   iter(s, n);
-  console.log(res);
+  display_list(res);
 }
 
 function stream_enumerate_interval(low, high) {
@@ -148,6 +148,10 @@ function partial_sums(stream) {
   return pair(head(stream), () => add_streams(partial_sums(stream), stream_tail(stream)));
 }
 
+function interleave(s1, s2) {
+  return is_null(s1) ? s2 : pair(head(s1), () => interleave(s2, stream_tail(s1)));
+}
+
 module.exports = {
   stream_tail,
   stream_enumerate_interval,
@@ -167,6 +171,7 @@ module.exports = {
   partial_sums,
   invert_unit_series,
   div_series,
+  interleave,
   integers,
   cos_series,
   sin_series,
