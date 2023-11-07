@@ -1,4 +1,4 @@
-const {tail, head, is_null, pair, display_list, list, append} = require('./pair');
+const {tail, head, is_null, pair, display_list, list, append, error} = require('./pair');
 
 // stream: 第一项是数据，第二项是一个 promise, 当需要时计算它
 // pair(h, () => t)
@@ -73,18 +73,25 @@ function stream_map_optimized(f, s) {
       );
 }
 
-function stream_map_2(f, s1, s2) {
-  return is_null(s1) || is_null(s2)
+const stream_map_2 = stream_combine;
+
+function stream_combine(f, s1, s2) {
+  return is_null(s1) && is_null(s2)
     ? null
-    : pair(f(head(s1), head(s2)), () => stream_map_2(f, stream_tail(s1), stream_tail(s2)));
+    : is_null(s1) || is_null(s2)
+    ? error(null, 'unexpected argument -- stream_combine')
+    : pair(
+        f(head(s1), head(s2)),
+        memo(() => stream_combine(f, stream_tail(s1), stream_tail(s2))),
+      );
 }
 
 function add_streams(s1, s2) {
-  return stream_map_2((x1, x2) => x1 + x2, s1, s2);
+  return stream_combine((x1, x2) => x1 + x2, s1, s2);
 }
 
 function mul_streams(s1, s2) {
-  return stream_map_2((x1, x2) => x1 * x2, s1, s2);
+  return stream_combine((x1, x2) => x1 * x2, s1, s2);
 }
 
 function scale_stream(stream, factor) {
@@ -152,6 +159,24 @@ function interleave(s1, s2) {
   return is_null(s1) ? s2 : pair(head(s1), () => interleave(s2, stream_tail(s1)));
 }
 
+function integral(delayed_integrand, initial_value, dt) {
+  const integ = pair(
+    initial_value,
+    // note the use of the memoization optimization, otherwise the GC will explode
+    memo(() => {
+      const integrand = delayed_integrand();
+      return add_streams(scale_stream(integrand, dt), integ);
+    }),
+  );
+  return integ;
+}
+
+function stream_map_3(f, s1, s2) {
+  return is_null(s1) && is_null(s2)
+    ? null
+    : pair(f(head(s1), head(s2)), () => stream_map_3(f, stream_tail(s1), stream_tail(s2)));
+}
+
 module.exports = {
   stream_tail,
   stream_enumerate_interval,
@@ -173,6 +198,9 @@ module.exports = {
   div_series,
   interleave,
   mul_streams,
+  stream_combine,
+  integral,
+  stream_map_3,
   integers,
   cos_series,
   sin_series,
