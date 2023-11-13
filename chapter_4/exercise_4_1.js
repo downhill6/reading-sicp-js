@@ -1,6 +1,6 @@
 // exercise 4.1
 
-const {is_null, tail, head, pair, list} = require('./pair');
+const {is_null, tail, head, pair, list} = require('./stdlib');
 
 const evaluate = x => console.log(x);
 

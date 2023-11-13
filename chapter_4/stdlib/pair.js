@@ -3,15 +3,11 @@ function pair(x, y) {
 }
 
 function head(pair) {
-  return is_null(pair) ? null : pair[0];
+  return is_null(pair) || pair === undefined ? null : pair[0];
 }
 
 function tail(pair) {
   return is_null(pair) ? null : pair[1];
-}
-
-function append(list1, list2) {
-  return is_null(list1) ? list2 : pair(head(list1), append(tail(list1), list2));
 }
 
 function is_null(val) {
@@ -82,6 +78,10 @@ function display_list(list) {
   console.log(rec(list));
 }
 
+function display(...args) {
+  console.log(...args);
+}
+
 module.exports = {
   pair,
   head,
@@ -92,7 +92,6 @@ module.exports = {
   last_pair,
   set_head,
   set_tail,
-  append,
   equal,
   contains_cycle,
   member,
@@ -100,4 +99,5 @@ module.exports = {
   is_number,
   error,
   display_list,
+  display,
 };

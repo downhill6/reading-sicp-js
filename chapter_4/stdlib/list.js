@@ -1,5 +1,13 @@
 const {pair, head, tail, is_null, is_pair, list, equal} = require('./pair.js');
 
+function list_ref(items, n) {
+  return n === 0 ? head(items) : list_ref(tail(items), n - 1);
+}
+
+function length(items) {
+  return is_null(items) ? 0 : 1 + length(tail(items));
+}
+
 function accumulate(op, initial, sequence) {
   return is_null(sequence) ? initial : op(head(sequence), accumulate(op, initial, tail(sequence)));
 }
@@ -38,6 +46,7 @@ function enumerate_tree(tree) {
 function append(list1, list2) {
   return is_null(list1) ? list2 : pair(head(list1), append(tail(list1), list2));
 }
+``;
 
 function reverse(sequence) {
   return fold_right((x, y) => append(y, list(x)), null, sequence);
@@ -65,7 +74,12 @@ function adjoin_set(x, set) {
   return is_element_of_set(x, set) ? set : pair(x, set);
 }
 
+function vector_to_list(vector) {
+  return list(...vector);
+}
+
 module.exports = {
+  length,
   accumulate,
   map,
   for_each,
@@ -79,4 +93,6 @@ module.exports = {
   permutations,
   adjoin_set,
   is_element_of_set,
+  list_ref,
+  vector_to_list,
 };
