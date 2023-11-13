@@ -3,7 +3,8 @@
 
 const {is_string, stringify} = require('./stdlib');
 const {map, accumulate, list_ref} = require('./stdlib/list');
-const {error, tail, head} = require('./stdlib/pair');
+const {error, tail, head, display, is_pair, is_null} = require('./stdlib/pair');
+const {parse} = require('./parser/parser');
 
 function evaluate(component, env) {
   return is_literal(component)
@@ -141,6 +142,11 @@ function make_literal(value) {
   return list('literal', value);
 }
 
+function construct_literal(component) {
+  const literal = literal_value(component);
+  return is_string(literal) ? '"' + literal + '"' : stringify(literal);
+}
+
 // name
 function make_name(symbol) {
   return list('name', symbol);
@@ -173,12 +179,28 @@ function arg_expressions(component) {
   return list_ref(component, 2);
 }
 
+function construct_function_application(component) {
+  // Constructs fun-expr(arg-expr_1, ..., arg-expr_n)
+  return (
+    unparse(function_expression(component)) +
+    bracketize(join(map(unparse, arg_expressions(component)), ','))
+  );
+}
+
 // conditional
 function is_conditional(component) {
   return (
     is_tagged_list(component, 'conditional_expression') ||
     is_tagged_list(component, 'conditional_statement')
   );
+}
+
+function is_conditional_expression(component) {
+  return is_tagged_list(component, 'conditional_expression');
+}
+
+function is_conditional_statement(component) {
+  return is_tagged_list(component, 'conditional_statement');
 }
 
 function conditional_predicate(component) {
@@ -193,6 +215,32 @@ function conditional_alternative(component) {
   return list_ref(component, 3);
 }
 
+function construct_conditional_expression(component) {
+  // xx ? a : b;
+  return (
+    unparse(conditional_predicate(component)) +
+    ' ? ' +
+    unparse(conditional_consequent(component)) +
+    ' : ' +
+    unparse(conditional_alternative(component))
+  );
+}
+
+function construct_conditional_statement(component) {
+  // if (xx) {..} else {..}
+  return (
+    'if ' +
+    bracketize(unparse(conditional_predicate(component))) +
+    '{\n' +
+    unparse(conditional_consequent(component)) +
+    '\n}' +
+    ' else ' +
+    '{\n' +
+    unparse(conditional_alternative(component)) +
+    '\n}'
+  );
+}
+
 // lambda expression
 function is_lambda_expression(component) {
   return is_tagged_list(component, 'lambda_expression');
@@ -203,11 +251,19 @@ function lambda_body(component) {
 }
 
 function lambda_parameter_symbols(component) {
-  return map(symbol_of_name, head(tail(component)));
+  return head(tail(component));
 }
 
 function make_lambda_expression(parameters, body) {
   return list('lambda_expression', parameters, body);
+}
+
+function construct_lambda_expression(component) {
+  // (name1,...namen) => {..}
+  const names = map(unparse, lambda_parameter_symbols(component));
+  const block = unparse(lambda_body(component));
+
+  return bracketize(join(names, ' , ')) + ' => ' + block;
 }
 
 // sqquense
@@ -235,6 +291,10 @@ function is_last_statement(stmts) {
   return is_null(tail(stmts));
 }
 
+function construct_sequence(component) {
+  return join(map(unparse, sequence_statements(component)), ';\n');
+}
+
 // block
 function is_block(component) {
   return is_tagged_list(component, 'block');
@@ -242,6 +302,10 @@ function is_block(component) {
 
 function block_body(component) {
   return list_ref(component, 1);
+}
+
+function construct_block(component) {
+  return '{\n' + unparse(block_body(component)) + '\n}';
 }
 
 // return statements
@@ -253,22 +317,32 @@ function return_expression(component) {
   return list_ref(component, 1);
 }
 
+function construct_return_statement(component) {
+  return 'return ' + unparse(return_expression(component));
+}
+
 // assignment
 function is_assignment(component) {
   return is_tagged_list(component, 'assignment');
 }
 
 function assignment_symbol(component) {
-  return symbol_of_name(head(tail(component)));
+  return head(tail(component));
 }
 
 function assignment_value_expression(component) {
   return list_ref(2);
 }
 
+function construct_assignment(component) {
+  return (
+    unparse(assignment_symbol(component)) + ' = ' + unparse(assignment_value_expression(component))
+  );
+}
+
 // Constant, variable, and function declarations
 function declaration_symbol(component) {
-  return symbol_of_name(head(tail(component)));
+  return head(tail(component));
 }
 
 function declaration_value_expression(component) {
@@ -287,21 +361,56 @@ function is_declaration(component) {
   );
 }
 
+function is_constant_declaratino(component) {
+  return is_tagged_list(component, 'constant_declaration');
+}
+
+function is_variable_declaration(component) {
+  return is_tagged_list(component, 'variable_declaration');
+}
+
+function construct_constant_declaration(component) {
+  return (
+    'const ' +
+    unparse(declaration_symbol(component)) +
+    ' = ' +
+    unparse(declaration_value_expression(component))
+  );
+}
+
+function construct_variable_declaration(component) {
+  return (
+    'let ' +
+    unparse(declaration_symbol(component)) +
+    ' = ' +
+    unparse(declaration_value_expression(component))
+  );
+}
+
 // function
 function is_function_declaration(component) {
   return is_tagged_list(component, 'function_declaration');
 }
 
 function function_declaration_name(component) {
-  return symbol_of_name(head(tail(component)));
+  return head(tail(component));
 }
 
 function function_declaration_parameters(component) {
-  return map(symbol_of_name, list_ref(component, 2));
+  return list_ref(component, 2);
 }
 
 function function_declaration_body(component) {
   return list_ref(component, 3);
+}
+
+function construct_function_declaration(component) {
+  const fn_name = unparse(function_declaration_name(component));
+  const parameters = bracketize(
+    join(map(unparse, function_declaration_parameters(component)), ','),
+  );
+  const body = unparse(function_declaration_body(component));
+  return 'function ' + fn_name + parameters + ' {\n' + body + '\n}';
 }
 
 // Derived components
@@ -314,8 +423,6 @@ function function_decl_to_constant_decl(component) {
     ),
   );
 }
-
-// 选择器为 operator_symbol 、 first_operand 和 second_operand
 
 function is_operator_combination(component) {
   return is_unary_operator_combination(component) || is_binary_operator_combination(component);
@@ -334,11 +441,11 @@ function operator_symbol(component) {
 }
 
 function first_operand(component) {
-  return head(list_ref(component, 2));
+  return list_ref(component, 2);
 }
 
 function second_operand(component) {
-  return head(tail(list_ref(component, 2)));
+  return list_ref(component, 3);
 }
 
 function operator_combination_to_application(component) {
@@ -349,4 +456,65 @@ function operator_combination_to_application(component) {
         make_name(operator),
         list(first_operand(component), second_operand(component)),
       );
+}
+
+function construct_unary_operator_combination(component) {
+  return operator_symbol(component) + bracketize(unparse(first_operand(component)));
+}
+
+function construct_binary_operator_combination(component) {
+  return (
+    bracketize(unparse(first_operand(component))) +
+    ' ' +
+    operator_symbol(component) +
+    ' ' +
+    bracketize(unparse(second_operand(component)))
+  );
+}
+
+// unparse
+function join(sequence, delimitter) {
+  return is_null(sequence)
+    ? ''
+    : is_null(tail(sequence))
+    ? head(sequence)
+    : head(sequence) + delimitter + join(tail(sequence), delimitter);
+}
+
+function bracketize(unparsed) {
+  return '(' + unparsed + ')';
+}
+
+function unparse(component) {
+  return is_literal(component)
+    ? construct_literal(component)
+    : is_name(component)
+    ? symbol_of_name(component)
+    : is_application(component)
+    ? construct_function_application(component)
+    : is_conditional_expression(component)
+    ? construct_conditional_expression(component)
+    : is_conditional_statement(component)
+    ? construct_conditional_statement(component)
+    : is_lambda_expression(component)
+    ? construct_lambda_expression(component)
+    : is_sequence(component)
+    ? construct_sequence(component)
+    : is_block(component)
+    ? construct_block(component)
+    : is_return_statement(component)
+    ? construct_return_statement(component)
+    : is_assignment(component)
+    ? construct_assignment(component)
+    : is_constant_declaratino(component)
+    ? construct_constant_declaration(component)
+    : is_variable_declaration(component)
+    ? construct_variable_declaration(component)
+    : is_function_declaration(component)
+    ? construct_function_declaration(component)
+    : is_unary_operator_combination(component)
+    ? construct_unary_operator_combination(component)
+    : is_binary_operator_combination(component)
+    ? construct_binary_operator_combination(component)
+    : error(component, 'unknown syntax -- unparse');
 }
