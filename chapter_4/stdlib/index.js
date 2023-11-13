@@ -15,6 +15,7 @@ const {
   is_element_of_set,
   list_ref,
   vector_to_list,
+  list_to_vector,
 } = require('./list');
 const {
   pair,
@@ -81,6 +82,7 @@ module.exports = {
   is_element_of_set,
   list_ref,
   vector_to_list,
+  list_to_vector,
   // misc
   is_NaN,
   is_array,

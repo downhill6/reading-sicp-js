@@ -78,6 +78,15 @@ function vector_to_list(vector) {
   return list(...vector);
 }
 
+function list_to_vector(lst) {
+  const vector = [];
+  while (!is_null(lst)) {
+    vector.push(head(lst));
+    lst = tail(lst);
+  }
+  return vector;
+}
+
 module.exports = {
   length,
   accumulate,
@@ -95,4 +104,5 @@ module.exports = {
   is_element_of_set,
   list_ref,
   vector_to_list,
+  list_to_vector,
 };
