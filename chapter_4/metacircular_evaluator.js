@@ -216,6 +216,57 @@ function conditional_alternative(component) {
   return list_ref(component, 3);
 }
 
+// exercise 4.4 logical expression
+function is_logical_expression(component) {
+  return is_tagged_list(component, 'logical_composition');
+}
+
+function logical_operation(component) {
+  return list_ref(component, 1);
+}
+
+function logical_expression_1(component) {
+  return list_ref(component, 2);
+}
+
+function logical_expression_2(component) {
+  return list_ref(component, 3);
+}
+
+function eval_and(component, env) {
+  const exp1 = logical_expression_1(component);
+  const exp2 = logical_expression_2(component);
+  return is_truthy(evaluate(exp1)) ? evaluate(exp2) : false;
+}
+
+function eval_and(component, env) {
+  const exp1 = logical_expression_1(component);
+  const exp2 = logical_expression_2(component);
+  return is_truthy(evaluate(exp1)) ? evaluate(exp2) : false;
+}
+
+function eval_or(component, env) {
+  const exp1 = logical_expression_1(component);
+  const exp2 = logical_expression_2(component);
+  return is_truthy(evaluate(exp1)) ? true : evaluate(exp2);
+}
+
+function eval_not(component, env) {
+  const exp1 = logical_expression_1(component);
+  return evaluate(exp1, env) ? false : true;
+}
+
+function eval_logical_expression(component, env) {
+  const operation = logical_operation(component);
+  return operation === '&&'
+    ? eval_and(component, env)
+    : operation === '||'
+    ? eval_or(component, env)
+    : operation === '!'
+    ? eval_not(component, env)
+    : error(component, 'eval_logical_expression  not found');
+}
+
 function is_sequence(stmt) {
   return is_tagged_list(stmt, 'sequence');
 }
@@ -474,6 +525,8 @@ function evaluate(component, env) {
     ? evaluate(operator_combination_to_application(component), env)
     : is_conditional(component)
     ? eval_conditional(component, env)
+    : is_logical_expression(component)
+    ? eval_logical_expression(component, env)
     : is_lambda_expression(component)
     ? make_function(lambda_parameter_symbols(component), lambda_body(component), env)
     : is_sequence(component)
@@ -491,5 +544,6 @@ function evaluate(component, env) {
     : error(component, 'unknown syntax -- evaluate');
 }
 
-const my_program = parse('1 < 2 ? 3 : 4;');
+const my_program = parse('(!true) ? 1 : 2');
+// display_list(my_program);
 console.log(evaluate(my_program, the_global_environment));
