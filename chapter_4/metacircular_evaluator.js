@@ -13,6 +13,7 @@ const {
   is_null,
   list,
   display_list,
+  set_head,
 } = require('./stdlib/pair');
 const {parse} = require('./parser/parser');
 // SICP JS 4.1.1
@@ -157,6 +158,7 @@ function is_variable_declaration(component) {
 function declaration_symbol(component) {
   return symbol_of_name(head(tail(component)));
 }
+
 function declaration_value_expression(component) {
   return head(tail(tail(component)));
 }
@@ -552,10 +554,12 @@ function evaluate(component, env) {
     : error(component, 'unknown syntax -- evaluate');
 }
 
-const my_program = parse('(x, y) => { const z = 1; (x, yy)  => { const yy =1; } }');
+const my_program = parse('{const a = 1;}');
 
-// display_list(lambda_parameter_symbols(my_program));
+display_list(my_program);
 // console.log(evaluate(my_program, the_global_environment));
 
 // exercise 4.5 verify
 // verify(my_program);
+
+evaluate(my_program);
