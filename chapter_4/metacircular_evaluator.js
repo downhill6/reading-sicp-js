@@ -146,6 +146,14 @@ function is_declaration(component) {
   );
 }
 
+function is_constant_declaration(component) {
+  return is_tagged_list(component, 'constant_declaration');
+}
+
+function is_variable_declaration(component) {
+  return is_tagged_list(component, 'variable_declaration');
+}
+
 function declaration_symbol(component) {
   return symbol_of_name(head(tail(component)));
 }
@@ -544,6 +552,10 @@ function evaluate(component, env) {
     : error(component, 'unknown syntax -- evaluate');
 }
 
-const my_program = parse('(!true) ? 1 : 2');
-// display_list(my_program);
-console.log(evaluate(my_program, the_global_environment));
+const my_program = parse('(x, y) => { const z = 1; (x, yy)  => { const yy =1; } }');
+
+// display_list(lambda_parameter_symbols(my_program));
+// console.log(evaluate(my_program, the_global_environment));
+
+// exercise 4.5 verify
+// verify(my_program);
