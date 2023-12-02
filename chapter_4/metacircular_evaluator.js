@@ -1,5 +1,6 @@
 // 4.1.1 元循环求值器
 // https://sourceacademy.org/sicpjs/4.1.1
+// 参考 js-slang/dist/interpreter/interpreter.js
 
 const {is_string, stringify, is_boolean, list_to_vector} = require('./stdlib');
 const {map, accumulate, list_ref, append, length} = require('./stdlib/list');
@@ -224,6 +225,40 @@ function conditional_consequent(component) {
 }
 function conditional_alternative(component) {
   return list_ref(component, 3);
+}
+
+function is_while_loop(component) {
+  return is_tagged_list(component, 'while_loop');
+}
+function while_predicate(component) {
+  return list_ref(component, 1);
+}
+function while_block(component) {
+  return list_ref(component, 2);
+}
+function is_break_statement(component) {
+  return is_tagged_list(component, 'break_statement');
+}
+function is_continue_statement(component) {
+  return is_tagged_list(component, 'continue_statement');
+}
+function eval_while(component, env) {
+  const predicate = while_predicate(component);
+  const body = while_block(component);
+  if (evaluate(predicate, env)) {
+    const result = evaluate(body, env);
+    if (is_break_statement(result)) {
+      return null;
+    } else if (is_return_value(result)) {
+      return return_value_content(result);
+    } else if (is_continue_statement(result)) {
+      return eval_while(component, env);
+    } else {
+      return eval_while(component, env);
+    }
+  } else {
+    return null;
+  }
 }
 
 // exercise 4.4 logical expression
@@ -551,15 +586,19 @@ function evaluate(component, env) {
     ? eval_declaration(component, env)
     : is_assignment(component)
     ? eval_assignment(component, env)
+    : is_while_loop(component)
+    ? eval_while(component, env)
+    : is_break_statement(component)
+    ? component
+    : is_continue_statement(component)
+    ? component
     : error(component, 'unknown syntax -- evaluate');
 }
 
-const my_program = parse('{const a = 1;}');
+const my_program = parse('while(1 < 3) { 1 + 2; break; }');
 
 display_list(my_program);
-// console.log(evaluate(my_program, the_global_environment));
+console.log(evaluate(my_program, the_global_environment));
 
 // exercise 4.5 verify
 // verify(my_program);
-
-evaluate(my_program);

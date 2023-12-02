@@ -90,22 +90,24 @@ parse 把文本转换为**标记列表**
 转为：
 
 ```js
-list("sequence",
-     list(list("constant_declaration",
-               list("name", "size"), list("literal", 2)),
-          list("binary_operator_combination", "*",
-               list("literal", 5), list("name", "size"))))
+list(
+  'sequence',
+  list(
+    list('constant_declaration', list('name', 'size'), list('literal', 2)),
+    list('binary_operator_combination', '*', list('literal', 5), list('name', 'size')),
+  ),
+);
 ```
 
 ![#fig-4.2](./images/ch4-parse-abstraction.svg)
 
 ### [词法定义](https://sourceacademy.org/sicpjs/4.1.2)
 
-### Literal expression 
+### Literal expression
 
 `< literal-expression > = list("literal", value)`
 
-- `parse("1;"); `  -> `list("literal", 1)`
+- `parse("1;"); ` -> `list("literal", 1)`
 
 - `parse("'hello world';"); ` -> `list("literal", "hello world")`
 
@@ -115,13 +117,13 @@ list("sequence",
 
 `< name > = list("name", symbol)`
 
-#### Expression statements 
+#### Expression statements
 
 不区分语句和表达式
 
 `< expression > = < expression >`
 
-#### Function applications 
+#### Function applications
 
 `< fun-expre(arg-expr1, ... arg-exprn) > = list("application", < fun-expr >, list(< arg-expr1 >, ... , < arg-exprn >))`
 
@@ -139,7 +141,7 @@ list("sequence",
 
 `< (name_1, …, name_n) => expression > = < (name_1, …, name_n) => { return expression; } >`
 
-`< (name_1, …, name_n) => block > =  list("lambda_expression", list(< name_1 >, ... < name_n >, < block >))` 
+`< (name_1, …, name_n) => block > =  list("lambda_expression", list(< name_1 >, ... < name_n >, < block >))`
 
 #### Sequences
 
@@ -149,7 +151,7 @@ list("sequence",
 
 `< { statements } > = list("block", < statements >)`
 
-#### Return statements 
+#### Return statements
 
 `< return expression > = list("return_statement", < expression >)`
 
@@ -167,11 +169,18 @@ list("sequence",
 
 #### Derived components
 
-一元运算符:  **!, -(number)**
+一元运算符: **!, -(number)**
 
 `< unary-operator expression > = list("unary_operator_combination", "unary-operator", list(< expression >))`
 
-二元运算符：**+, -, *, /, %, ===, !==, >, <, >= ,<=**
+二元运算符：**+, -, \*, /, %, ===, !==, >, <, >= ,<=**
 
 `< expression_1 binary-operator expression_2 > = list("binary_operator_combination", "binary-operator",list(< expression_1 >, < expression_2 >))`
 
+### while loop
+
+`< while ( predicate ) block > = list("while_loop", < predicate >, < block >`
+
+`< break; > = list("break_statement")`
+
+`< continue; > = list("continue_statement")`
