@@ -17,6 +17,13 @@ function unreachable() {
   console.error('error: unreachable');
 }
 
+class ParseError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'ParseError';
+  }
+}
+
 function makeSequenceIfNeeded(exs) {
   return exs.length === 1
     ? transform(exs[0])

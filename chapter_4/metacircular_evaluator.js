@@ -480,13 +480,28 @@ function assign_symbol_value(symbol, val, env) {
         : scan(tail(symbols), tail(vals));
     }
     if (env === the_empty_environment) {
-      error(symbol, 'unbound name -- assignment');
+      // error(symbol, 'unbound name -- assignment');
+      return 'unbound name';
     } else {
       const frame = first_frame(env);
       return scan(frame_symbols(frame), frame_values(frame));
     }
   }
-  return env_loop(env);
+  const result = env_loop(env);
+  // 绑定新变量到 env 中，实现很简单，只需要把新的 frame 放到 env 的第一个位置即可
+  // 临时处理，以后再想办法优化
+  if (result === 'unbound name') {
+    const frame = first_frame(env);
+    const symbols = frame_symbols(frame);
+    const values = frame_values(frame);
+    const new_env = extend_environment(
+      append(symbols, list(symbol)),
+      append(values, list(val)),
+      null,
+    );
+    set_head(env, head(new_env));
+  }
+  return undefined;
 }
 
 // functions from SICP JS 4.1.4
@@ -595,9 +610,11 @@ function evaluate(component, env) {
     : error(component, 'unknown syntax -- evaluate');
 }
 
-const my_program = parse('while(1 < 3) { 1 + 2; break; }');
+const my_program = parse(
+  'let i = 0;while(i < 3) { i = i + 1; if (i === 2) { break; } } display(i);',
+);
 
-display_list(my_program);
+// display_list(my_program);
 console.log(evaluate(my_program, the_global_environment));
 
 // exercise 4.5 verify
