@@ -610,9 +610,7 @@ function evaluate(component, env) {
     : error(component, 'unknown syntax -- evaluate');
 }
 
-const my_program = parse(
-  'let i = 0;while(i < 3) { i = i + 1; if (i === 2) { break; } } display(i);',
-);
+const my_program = parse('1; { let x = 2; { x = x + 3; } }');
 
 // display_list(my_program);
 console.log(evaluate(my_program, the_global_environment));
