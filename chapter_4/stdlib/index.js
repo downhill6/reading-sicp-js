@@ -2,6 +2,7 @@ const {
   length,
   accumulate,
   map,
+  map2,
   for_each,
   filter,
   enumerate_interval,

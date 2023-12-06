@@ -16,6 +16,12 @@ function map(fun, items) {
   return is_null(items) ? null : pair(fun(head(items)), map(fun, tail(items)));
 }
 
+function map2(fun, items1, items2) {
+  return is_null(items1) || is_null(items2)
+    ? null
+    : pair(fun(head(items1), head(items2)), map(fun, tail(items1), tail(items2)));
+}
+
 function for_each(fun, items) {
   if (!is_null(items)) {
     fun(head(items));
@@ -91,6 +97,7 @@ module.exports = {
   length,
   accumulate,
   map,
+  map2,
   for_each,
   filter,
   enumerate_interval,
